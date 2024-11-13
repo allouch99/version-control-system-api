@@ -16,10 +16,7 @@ class LoginService extends Service
             'password' => ['required', 'string'],
         ];
     }
-    protected function validator($request,$rule): array
-    {
-        return Validator::make($request->all(), $rule)->errors()->all();
-    }
+
     protected function attemptLogin($request): bool
     {
         return Auth::attempt($request->only('email', 'password'));

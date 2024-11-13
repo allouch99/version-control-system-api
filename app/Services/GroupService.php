@@ -3,49 +3,65 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\Group;
 use App\Services\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class GroupService extends Service
 {
-    protected function rule(): array
+    public function getAllGroups()
     {
-        return  [
-            'name' => ['required', 'string', 'max:255'],
-            'type'=>['required',  Rule::in(['public', 'private']),]
-        ];
+        return Group::all();
     }
-    protected function data(Request $request): array
-    {
-        return [
-            'name' => $request['name'],
-            'type' => $request['type'],
-        ];
-    }
-    protected function validator($request,$rule): array
-    {
-        return Validator::make($request->all(), $rule)->errors()->all();
-    }
+
     public function store(Request $request): array
     {
-        $errors = $this->validator($request,$this->rule());
-        if ($errors) {
-            return $this->arrayData($errors,'',404,true);
-        }else{
-         $group = User::find(Auth::id())->groups()->create($this->data($request));
-         $data = [
-             'name' => $group['name'],
-             'type' => $group['type'],
-         ];
-         return $this->arrayData('The group has been created successfully',
-             $data,201,false);
-
+        $user = User::find(Auth::id());
+        $path = 'files/'.$user['user_name'].'/'.$request['name'];
+        if($request->hasFile('bg_image')){
+            $bg_image_url = Storage::store($path, $request['bg_image']);
         }
+        if($request->hasFile('icon_image')){
+            $icon_image_url = Storage::store($path, $request['icon_image']);
+        }
+        
+        
+       $data = [
+        'name' => $request['name'],
+        'type' => $request['type'],
+        'description' => $request['description'],
+        'bg_image_url' => $bg_image_url,
+        'icon_image_url' => $icon_image_url,
+       ];
 
+       
+        
+        $group = $user->groups()->create($data);
+        
+        return [
+            'name' => $group['name'],
+            'description' => $group['description'],
+        ];
+
+    }
+    public function update(Request $request,Group $group)
+    {
+        $data = [
+            'name' => $request['name'],
+            'type' => $request['type'],
+           ];
+        
+        $group->update($data);
+        return [
+            'name' => $group['name'],
+            'type' => $group['type'],
+        ];
+    }
+    public function destroy(Group $group)
+    {
+        $group->delete();
     }
 
 }

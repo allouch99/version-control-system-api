@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Services\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+
 
 class RegisterService extends Service
 {
@@ -28,10 +28,7 @@ class RegisterService extends Service
             'password' => Hash::make($request['password']),
         ];
     }
-    public function validator($request,$rule): array
-    {
-        return Validator::make($request->all(), $rule)->errors()->all();
-    }
+
     public function createAccount(Request $request): array
     {
         $data = $this->data($request);
@@ -46,7 +43,7 @@ class RegisterService extends Service
         }
         $user = User::create($data);
         $token = $user->createToken($data['email'])->plainTextToken;
-
+       
         return [
             'message' => 'Account successfully created',
             'data' => [

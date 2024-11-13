@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('groups', function (Blueprint $table) {
+        Schema::create('abilities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('name');
-            $table->string('description');
-            $table->string('bg_image_url')->nullable();
-            $table->string('icon_image_url')->nullable();
-            $table->enum('type',['public','private'])->default('public');
+            $table->foreignId('group_id')->constrained('groups')->cascadeOnDelete();
+            $table->json('rule');
             $table->timestamps();
         });
     }
@@ -28,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('groups');
+        Schema::dropIfExists('abilities');
     }
 };

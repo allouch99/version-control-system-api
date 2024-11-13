@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\FileController;
+use App\Http\Controllers\InvitationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -16,4 +19,32 @@ Route::prefix('auth')->group(function () {
     Route::post('/register',[RegisterController::class,'register']);
     Route::post('/login',[LoginController::class,'login']);
     Route::post('/logout', [LogoutController::class,'logout'])->middleware('auth:sanctum');
+});
+
+Route::prefix('groups')->middleware('auth:sanctum')->group(function () {
+    Route::get('/',[GroupController::class,'index']);
+    Route::post('/',[GroupController::class,'store']);
+    Route::put('/{group}',[GroupController::class,'update']);
+    Route::get('/{group}',[GroupController::class,'show']);
+    Route::delete('/{group}',[GroupController::class,'destroy']);
+
+    Route::prefix('/{group}/files')->group(function () {
+        Route::get('/',[FileController::class,'index']);
+        Route::post('/',[FileController::class,'store']);
+        Route::put('/{file}',[FileController::class,'update']);
+        Route::get('/{file}',[FileController::class,'show']);
+        Route::delete('/{file}',[FileController::class,'destroy']);
+    });
+
+    
+
+});
+
+
+Route::prefix('invitation')->middleware('auth:sanctum')->group(function () {
+
+    Route::post('/{group}',[InvitationController::class,'create']);
+    Route::get('/{group}',[InvitationController::class,'show']);
+    Route::delete('/{group}',[InvitationController::class,'destroy']);
+
 });
