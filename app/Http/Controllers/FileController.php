@@ -29,7 +29,6 @@ class FileController extends Controller
         if ($errors) {
             return $this->errorResponse($errors);
         }
-
         $data = null;
         try{
             $data = $this->fileService->store($request,$group);
