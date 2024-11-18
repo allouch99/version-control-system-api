@@ -1,0 +1,33 @@
+services:
+  app:
+    build:
+      context: '.'
+    container_name: app
+    networks:
+      - laravel
+    ports:
+      - 8000:8000
+    depends_on:
+      - mysql
+  mysql:
+    image: mysql/mysql-server:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: '0000'
+      MYSQL_DATABASE: version_control_system_api
+      MYSQL_USER: allouch
+      MYSQL_PASSWORD: '0000'
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - laravel
+
+networks:
+  laravel:
+    driver: bridge
+
+volumes:
+  mysql-data:
+
