@@ -13,17 +13,8 @@ RUN apt-get update && apt-get upgrade -y \
 
 RUN /bin/bash -c "$(curl -fsSL https://php.new/install/linux)" && source /root/.bashrc 
 ENV PATH=${PATH}":/root/.config/herd-lite/bin"
-
 ENV COMPOSER_ALLOW_SUPERUSER=1
-#ENV COMPOSER_DISABLE_NETWORK=1
-
-COPY . .
-COPY .env.example .env 
-
 RUN  composer config -g process-timeout 1200
-RUN  composer install --ignore-platform-reqs 
-
-RUN php artisan key:generate 
 
 ENTRYPOINT ["/bin/bash","-c"]
-CMD ["php artisan serve --host=0.0.0.0 --port=8000"]
+CMD ["composer install --ignore-platform-reqs && php artisan key:generate && php artisan serve --host=0.0.0.0 --port=8000"]
