@@ -6,11 +6,12 @@ use App\Models\User;
 use App\Models\File;
 use App\Models\Group;
 use App\Services\Service;
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use App\Exceptions\FileException;
-
+use Exception;
+use Illuminate\Support\Facades\Validator;
 class FileService extends Service
 {
     public function getAllFilesInGroup(int $group)
@@ -18,44 +19,88 @@ class FileService extends Service
         return Group::find($group)->files;
     }
 
-    public function store(Request $request,Group $group)
+    public function store(Request $request)
     {
-        $user = User::find(Auth::id());
-        $path = 'files/'.$user['user_name'].'/'.$group['name'];
+        $errors = Validator::make($request->all(), [
+            'file' => ['required','file','max:20480'],
+            'group_id' => ['required','integer','gt:0',
+            function (string $attribute, mixed $value, Closure $fail) {
+                if (!Group::where('id',$value)->first()) {
+                    $fail("Invalid {$attribute}.");
+                }
+            },],
+        ])->errors()->all();
+        if ($errors)
+            return $this->responseService->message($errors)->status(404)->error(true);
+        
+        try{
+            $user = User::find(Auth::id());
+            $group = Group::find($request['group_id']);
+            
+            $file = [
+                'name' => $request['file']->getClientOriginalName(),
+                'contents' => $request['file'],
+                'directory' => $path = 'files/'.$user['user_name'].'/'.$group['name'].'/',
+            ];
 
-        $data = [
-            'name' => $request['file']->getClientOriginalName(),
-            'file' => $request['file'],
-            'file_path' => $path.'/'. $request['file']->getClientOriginalName(),
-        ];
+            $path = $file['directory'] . $file['name'];
 
-        if (Storage::disk('local')->exists($data['file_path'])) {
-            throw new FileException('The file already exists.', 404);
-            return $data;
+            if (Storage::disk('local')->exists($path)) {
+                throw new Exception('The file already exists.', 404);
+            }
+
+            Storage::putFileAs($file['directory'], $file['contents'], $file['name']);
+            $group->files()->create($file);
+            
+    
+            
+            return $this->responseService->message('The file has been created successfully')
+            ->status(201);
+        }catch(Exception $exception){
+            return $this->responseService->message($exception->getMessage())
+            ->status(500)->error(true);
         }
-
-        Storage::putFileAs($path, $data['file'], $data['name']);
-        $group->files()->create($data);
-
-        return $data;
+        
+       
 
     }
     public function update(Request $request,File $file)
     {
-        $data = [
-            'name' => $request['name'],
-            'type' => $request['type'],
-           ];
+
+        $errors = Validator::make($request->all(), [
+            'file'=>['required','file','max:20480']
+        ])->errors()->all();
+
+        if (!$errors && $file['name'] != $request['file']->getClientOriginalName())
+            $errors[] = 'The attached file must have the same name as the current file.';
+        if ($errors)
+            return $this->responseService->message($errors)->status(404)->error(true);
         
-        $file->update($data);
-        return [
-            'name' => $file['name'],
-            'type' => $file['type'],
-        ];
+        $path = $file['directory'].$file['name'];
+        if (!Storage::disk('local')->exists($path)) {
+            throw new Exception('The file does not exist.', 404);
+        }
+       
+        Storage::putFileAs($file['directory'], $request['file'],$file['name']);
+        
+
+        $file->updated_at = now();
+        $file->save();
+
+        return $this->responseService->message('The file has been updated successfully')
+            ->status(201);
     }
     public function destroy(File $file)
     {
+
         $file->delete();
+
+        $path = $file['directory'].$file['name'];
+        Storage::delete($path);
+
+        $file->delete();
+        return $this->responseService->message('The file has been deleted successfully')
+            ->status(201);
     }
 
 }

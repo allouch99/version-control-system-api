@@ -3,19 +3,16 @@
 namespace App\Services;
 
 use App\Traits\ValidatorTrait;
-use App\Traits\ResponseTrait;
+use App\Services\ResponseService;
 
 abstract class Service
 {
-    use ValidatorTrait,ResponseTrait;
-    protected function arrayData($message = '', $data = [], $status = 200,$error = false,$wrap = 'data'): array
+    use ValidatorTrait;
+   
+    protected $responseService;
+    public function __construct(ResponseService $responseService)
     {
-        return [
-            'message' => $message,
-            $wrap => $data,
-            'status' => $status,
-            'error' => $error,
-        ];
+        $this->responseService = $responseService;
     }
 
 }

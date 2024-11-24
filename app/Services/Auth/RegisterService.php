@@ -29,32 +29,18 @@ class RegisterService extends Service
         ];
     }
 
-    public function createAccount(Request $request): array
+    public function createAccount(Request $request)
     {
         $data = $this->data($request);
         $errors = $this->validator($request,$this->rule());
-        if($errors){
-            return [
-                'message' => $errors,
-                'data' => null,
-                'status_number' => 404,
-                'error' => true,
-            ];
-        }
+        if($errors)
+            return $this->responseService->message($errors)->status(404)->error(true);
+        
         $user = User::create($data);
-        $token = $user->createToken($data['email'])->plainTextToken;
-       
-        return [
-            'message' => 'Account successfully created',
-            'data' => [
-                'name' => $user['name'],
-                'user_name' => $user['user_name'],
-                'email' => $user['email'],
-                'token' => $token,
-            ],
-            'status_number' => 201,
-            'error' => false,
-        ];
+        $user['token'] = $user->createToken($data['email'])->plainTextToken;
+
+        return $this->responseService->message('Account successfully created')->status(201)->data($user);
+        
     }
 
 }

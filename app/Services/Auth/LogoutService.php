@@ -6,15 +6,11 @@ use App\Services\Service;
 
 class LogoutService extends Service
 {
-    public function logout($request): array
+    public function logout($request)
     {
+        
         $request->user()->currentAccessToken()->delete();
-        return [
-            'message' => 'Signed out successfully',
-            'data' => null,
-            'status_number' => 200,
-            'error' => false,
-        ];
+        return $this->responseService->message('Signed out successfully');
     }
 
 

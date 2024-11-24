@@ -17,13 +17,6 @@ class RegisterController extends Controller
 
     public function register(Request $request): JsonResponse
     {
-        $response = $this->registerService->createAccount($request);
-
-         return response()->json([
-                'message' => $response['message'],
-                'data' => $response['data'],
-                'error' => $response['error'],
-            ],$response['status_number']);
-
+        return  $this->registerService->createAccount($request)->jsonResponse();
     }
 }

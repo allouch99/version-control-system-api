@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('group_id')->constrained('groups')->cascadeOnDelete();
             $table->string('name');
-            $table->string('file_path');
-            $table->string('icon_image_url');
+            $table->string('directory');
+            $table->enum('status',['free','locked'])->default('free');
             $table->timestamps();
         });
     }

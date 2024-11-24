@@ -17,14 +17,7 @@ class LoginController extends Controller
     }
     public function login(Request $request): JsonResponse
     {
-        $response = $this->loginService->login($request);
-
-        return response()->json([
-            'message' => $response['message'],
-            'data' => $response['data'],
-            'error' => $response['error'],
-        ],$response['status_number']);
-
+        return  $this->loginService->login($request)->jsonResponse();
     }
 
 }

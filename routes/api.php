@@ -28,16 +28,13 @@ Route::prefix('groups')->middleware('auth:sanctum')->group(function () {
     Route::get('/{group}',[GroupController::class,'show']);
     Route::delete('/{group}',[GroupController::class,'destroy']);
 
-    Route::prefix('/{group}/files')->group(function () {
-        Route::get('/',[FileController::class,'index']);
-        Route::post('/',[FileController::class,'store']);
-        Route::put('/{file}',[FileController::class,'update']);
-        Route::get('/{file}',[FileController::class,'show']);
-        Route::delete('/{file}',[FileController::class,'destroy']);
-    });
-
-    
-
+});
+Route::prefix('/files')->middleware('auth:sanctum')->group(function () {
+    Route::get('/',[FileController::class,'index']);
+    Route::post('/',[FileController::class,'store']);
+    Route::patch('/{file}',[FileController::class,'update']);
+    Route::get('/{file}',[FileController::class,'show']);
+    Route::delete('/{file}',[FileController::class,'destroy']);
 });
 
 

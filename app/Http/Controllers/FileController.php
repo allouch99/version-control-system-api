@@ -23,21 +23,9 @@ class FileController extends Controller
     }
 
 
-    public function store(Request $request,Group $group)
+    public function store(Request $request)
     {
-        $errors = Validator::make($request->all(), $this->rule())->errors()->all();
-        if ($errors) {
-            return $this->errorResponse($errors);
-        }
-        $data = null;
-        try{
-            $data = $this->fileService->store($request,$group);
-            
-        }catch(FileException $exception){
-           return $exception->render($request);
-        }
-        
-        return $this->successResponse('The file has been created successfully',$data,201);
+        return $this->fileService->store($request)->jsonResponse();
     }
 
     /**
@@ -48,20 +36,13 @@ class FileController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(File $file)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, File $file)
     {
-        //
+        return $this->fileService->update($request,$file)->jsonResponse();
     }
 
     /**
@@ -69,13 +50,7 @@ class FileController extends Controller
      */
     public function destroy(File $file)
     {
-        //
+        return $this->fileService->destroy($file)->jsonResponse();
     }
 
-    protected function rule(): array
-    {
-        return  [
-            'file'=>['required','file']
-        ];
-    }
 }

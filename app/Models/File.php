@@ -9,7 +9,7 @@ class File extends Model
 {
     protected $fillable = [
         'name',
-        'file_path'
+        'directory'
     ];
 
     public function group():BelongsTo

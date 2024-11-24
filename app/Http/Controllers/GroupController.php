@@ -20,27 +20,19 @@ class GroupController extends Controller
     }
     public function index()
     {
-        $groups = $this->groupService->getAllGroups();
-        return $this->successResponse('List of groups',$groups,200);
+        return  $this->groupService->index()->jsonResponse();
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
-        
-        $errors = Validator::make($request->all(), $this->rule())->errors()->all();
-        if ($errors) {
-            return $this->errorResponse($errors);
-        }
-        $data = $this->groupService->store($request);
-        return $this->successResponse('The group has been created successfully',$data,201);
-       
+        return  $this->groupService->store($request)->jsonResponse();
     }
 
 
     public function show(Group $group)
     {
-        return response()->json($group);
-        return $this->successResponse('',$group,200);
+        return  $this->groupService->show($group)->jsonResponse();
+
     }
 
 
@@ -49,12 +41,7 @@ class GroupController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        $errors = Validator::make($request->all(), $this->rule())->errors()->all();
-        if ($errors) {
-            return $this->errorResponse($errors);
-        }
-       // $data = $this->groupService->update($request,$id);
-        //return $this->successResponse('The group has been updated successfully',$data,201);
+        //
     }
 
     /**
