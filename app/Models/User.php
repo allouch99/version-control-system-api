@@ -5,10 +5,12 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Group;
+use App\Models\Invitation;
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -37,8 +39,26 @@ class User extends Authenticatable
         ];
     }
 
+    public function hasRole()
+    {
+        //return $this->hasMany(Invitation::class,'sent_id');
+    }
+
     public function groups():HasMany
     {
         return $this->hasMany(Group::class,'user_id');
     }
+
+    public function invitations(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class,'invitations')
+                ->as('invitation')
+                ->withPivot('description', 'role','status');
+    }
+
+    public function setInvitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class,'sent_id');
+    }
+
 }

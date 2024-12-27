@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Services\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Str;
 
 class RegisterService extends Service
 {
@@ -23,7 +23,7 @@ class RegisterService extends Service
     {
         return [
             'name' => $request['name'],
-            'user_name' => $request['user_name'],
+            'user_name' => Str::slug($request['user_name'], '-'),
             'email' => $request['email'],
             'password' => Hash::make($request['password']),
         ];

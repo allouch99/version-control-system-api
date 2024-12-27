@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('files', function (Blueprint $table) {
+        Schema::create('invitations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('group_id')->constrained('groups')->cascadeOnDelete();
-            $table->foreignId('user_id')->nullable()->default(null)->constrained('users')->cascadeOnDelete();
-            $table->string('name');
-            $table->string('directory');
-            $table->enum('status',['free','locked'])->default('free');
+            $table->foreignId('sent_id')->constrained('users')->cascadeOnDelete();
+            $table->enum('role',['viewer','writer'])->default('viewer');
+            $table->enum('status',['accepted','rejected','unread'])->default('unread');
+            $table->string('description');
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('files');
+        Schema::dropIfExists('invitations');
     }
 };

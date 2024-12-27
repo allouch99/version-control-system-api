@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 use Closure;
 
 class GroupService extends Service
@@ -28,9 +29,9 @@ class GroupService extends Service
             return $this->responseService->message($errors)->status(404)->error(true);
         }
         $user = User::find(Auth::id());
-        $path = 'images/'.$user['user_name'].'/'.$request['name'];
+        $path = 'images/'.$user['user_name'].'/'.Str::slug($request['name'], '-');
         $data = [
-            'name' => $request['name'],
+            'name' => Str::slug($request['name'], '-'),
             'type' => $request['type'],
             'description' => $request['description'],
            ];

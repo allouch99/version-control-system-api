@@ -35,13 +35,15 @@ Route::prefix('/files')->middleware('auth:sanctum')->group(function () {
     Route::patch('/{file}',[FileController::class,'update']);
     Route::get('/{file}',[FileController::class,'show']);
     Route::delete('/{file}',[FileController::class,'destroy']);
+    Route::post('/pull',[FileController::class,'pull']);
 });
 
 
-Route::prefix('invitation')->middleware('auth:sanctum')->group(function () {
-
-    Route::post('/{group}',[InvitationController::class,'create']);
-    Route::get('/{group}',[InvitationController::class,'show']);
+Route::prefix('invitations')->middleware('auth:sanctum')->group(function () {
+    Route::get('/{type}',[InvitationController::class,'index'])
+        ->whereIn('type', ['sent', 'received']);
+    Route::post('/',[InvitationController::class,'store']);
+   // Route::get('/{group}',[InvitationController::class,'show']);
     Route::delete('/{group}',[InvitationController::class,'destroy']);
 
 });
