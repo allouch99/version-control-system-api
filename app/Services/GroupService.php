@@ -31,6 +31,7 @@ class GroupService extends Service
         $user = User::find(Auth::id());
         $path = 'images/'.$user['user_name'].'/'.Str::slug($request['name'], '-');
         $data = [
+            'id' => null,
             'name' => Str::slug($request['name'], '-'),
             'type' => $request['type'],
             'description' => $request['description'],
@@ -44,7 +45,8 @@ class GroupService extends Service
         
 
 
-        $user->groups()->create($data);
+        $group = $user->groups()->create($data);
+        $data['id'] = $group->id;
         return $this->responseService->message('The group has been created successfully')
             ->status(201)->data($data);
 
@@ -68,6 +70,8 @@ class GroupService extends Service
     public function destroy(Group $group)
     {
         $group->delete();
+        return $this->responseService->message('The group has been created successfully')
+            ->status(204);
     }
 
     protected function rule(): array

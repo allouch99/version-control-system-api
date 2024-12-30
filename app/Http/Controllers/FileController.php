@@ -53,9 +53,13 @@ class FileController extends Controller
         return $this->fileService->destroy($file)->jsonResponse();
     }
 
-    public function pull(Request $request)
+    public function lock(Request $request)
     {
-        return $this->fileService->pull($request)->jsonResponse();
+        return $this->fileService->lock($request)->jsonResponse();
+    }
+    public function pull(File $file)
+    {
+        return $this->fileService->pull($file)->jsonResponse();
     }
 
 }

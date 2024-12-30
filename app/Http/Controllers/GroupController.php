@@ -49,8 +49,7 @@ class GroupController extends Controller
      */
     public function destroy(Group $group)
     {
-        $this->groupService->destroy($group);
-        return $this->successResponse('The group has been deleted successfully',[],204);
+        return  $this->groupService->destroy($group)->jsonResponse();
     }
     protected function rule(): array
     {

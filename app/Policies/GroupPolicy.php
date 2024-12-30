@@ -14,5 +14,11 @@ class GroupPolicy
             return true;
         return false;
     }
+    public function pullFile(User $user, Group $group): bool
+    {
+        if($group->user_id === $user->id)
+            return true;
+        return false;
+    }
 
 }

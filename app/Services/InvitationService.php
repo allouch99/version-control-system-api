@@ -49,7 +49,12 @@ class InvitationService extends Service
             ->status(201)->data($data);
     }
   
-
+    public function destroy(Invitation $invitation)
+    {
+        $invitation->delete();
+        return $this->responseService->message('The invitation has been created successfully')
+            ->status(204);
+    }
     protected function rule(): array
     {
         return  [

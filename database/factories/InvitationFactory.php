@@ -17,7 +17,7 @@ class InvitationFactory extends Factory
     public function definition(): array
     {
         return [
-            'description' => fake()->text(),
+            'description' => fake()->sentence(15),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Invitation;
 use Illuminate\Http\Request;
 use App\Services\InvitationService;
 
@@ -23,5 +24,9 @@ class InvitationController extends Controller
     public function accept(Request $request)
     {
         return  $this->invitationService->store($request)->jsonResponse();
+    }
+    public function destroy(Invitation $invitation)
+    {
+        return  $this->invitationService->destroy($invitation)->jsonResponse();
     }
 }
