@@ -55,6 +55,12 @@ class User extends Authenticatable
                 ->as('invitation')
                 ->withPivot('description', 'role','status');
     }
+    public function memberships(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class,'memberships')
+                ->as('membership')
+                ->withPivot('role');
+    }
 
     public function setInvitations(): HasMany
     {

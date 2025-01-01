@@ -44,6 +44,7 @@ Route::prefix('/files')->middleware('auth:sanctum')->group(function () {
 Route::prefix('invitations')->middleware('auth:sanctum')->group(function () {
     Route::get('/{type}',[InvitationController::class,'index'])
         ->whereIn('type', ['sent', 'received']);
+    Route::post('/{invitation}/accept',[InvitationController::class,'accept']);
     Route::post('/',[InvitationController::class,'store']);
     Route::delete('/{invitation}',[InvitationController::class,'destroy']);
 

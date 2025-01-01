@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
 use App\Models\Group;
 
 class File extends Model
@@ -16,10 +18,16 @@ class File extends Model
         'directory'
     ];
 
-    protected function getPathAttribute()
+    protected function path(): Attribute
     {
-        return $this->directory . $this->name;
+        return Attribute::make(
+            get: fn (string $value) => dd($value)
+        );
     }
+    // protected function getPathAttribute()
+    // {
+    //     return $this->directory . $this->name;
+    // }
     protected function getTemporaryUrlAttribute()
     {
         return Storage::temporaryUrl($this->path,now()->addMinutes(5));

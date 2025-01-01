@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('group_id')->constrained('groups')->cascadeOnDelete();
             $table->enum('role',['viewer','writer'])->default('viewer');
             $table->primary(['user_id','group_id']);
-            $table->timestamps();
         });
     }
 
