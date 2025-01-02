@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             GroupSeeder::class,
             FileSeeder::class,
             InvitationSeeder::class,
+            MembershipSeeder::class,
         ]);
 
     }

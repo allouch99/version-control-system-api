@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('files', function (Blueprint $table) {
             $table->id();
             $table->foreignId('group_id')->constrained('groups')->cascadeOnDelete();
-            $table->foreignId('user_id')->nullable()->default(null)->constrained('users')->cascadeOnDelete();
+            $table->foreignId('locked_by')->nullable()->default(null)->constrained('users')->cascadeOnDelete();
             $table->string('name');
             $table->string('directory');
             $table->enum('status',['free','locked'])->default('free');

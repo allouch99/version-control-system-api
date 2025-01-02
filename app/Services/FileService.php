@@ -49,7 +49,7 @@ class FileService extends Service
             $file = [
                 'name' => $request['file']->getClientOriginalName(),
                 'contents' => $request['file'],
-                'directory' => $path = 'files/' . $user['user_name'] . '/' . $group['name'] . '/',
+                'directory' => $group->filesDirectory,
             ];
 
             $path = $file['directory'] . $file['name'];
@@ -116,7 +116,7 @@ class FileService extends Service
                 'required',
                 'regex:/^(\d+)\s*(,\s*(\d+)\s*)*$/i',
                 function (string $attribute, mixed $value, Closure $fail) {
-                    if (File::whereIn('id', explode(',', $value))->whereNotNull('user_id')->first()) {
+                    if (File::whereIn('id', explode(',', $value))->whereNotNull('locked_by')->first()) {
                         $fail("Locked files cannot be handled.");
                     }
                 }
@@ -126,7 +126,7 @@ class FileService extends Service
             return $this->responseService->message($errors)->status(404)->error(true);
         $files_id = array_unique(explode(',', $request->input('files_id')));
 
-        File::whereIn('id', $files_id)->update(['user_id' => Auth::id()]);
+        File::whereIn('id', $files_id)->update(['locked_by' => Auth::id()]);
 
 
 

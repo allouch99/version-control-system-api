@@ -21,17 +21,20 @@ class File extends Model
     protected function path(): Attribute
     {
         return Attribute::make(
-            get: fn (string $value) => dd($value)
+            get: fn () => (
+                $this->attributes['directory'] . $this->attributes['name'] 
+            )    
         );
     }
-    // protected function getPathAttribute()
-    // {
-    //     return $this->directory . $this->name;
-    // }
-    protected function getTemporaryUrlAttribute()
+    protected function temporaryUrl(): Attribute
     {
-        return Storage::temporaryUrl($this->path,now()->addMinutes(5));
+        return Attribute::make(
+            get: fn () =>  (
+                Storage::temporaryUrl($this->path, now()->addMinutes(5))
+            ) 
+        );
     }
+   
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class, 'group_id');

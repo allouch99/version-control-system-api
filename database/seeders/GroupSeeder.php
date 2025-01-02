@@ -68,7 +68,7 @@ class GroupSeeder extends Seeder
                     'description' => 'Cascading Style Sheets (CSS) is a style sheet language used for specifying the presentation and styling of a document written in a markup language such as HTML',
                     'bg_image_url' => 'images/lith/css/bg.JPG',
                     'icon_image_url' => 'images/lith/css/icon.JPG',
-                    'type' => 'public'
+                    'type' => 'private'
                 ]
                 )
                 ->create();

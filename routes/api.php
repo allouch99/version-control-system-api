@@ -24,18 +24,18 @@ Route::prefix('auth')->group(function () {
 Route::prefix('groups')->middleware('auth:sanctum')->group(function () {
     Route::get('/',[GroupController::class,'index']);
     Route::post('/',[GroupController::class,'store']);
-    Route::put('/{group}',[GroupController::class,'update']);
+    Route::patch('/{group}',[GroupController::class,'update']);
     Route::get('/{group}',[GroupController::class,'show']);
     Route::delete('/{group}',[GroupController::class,'destroy']);
 
 });
 Route::prefix('/files')->middleware('auth:sanctum')->group(function () {
-    Route::get('/',[FileController::class,'index']);
+    Route::get('/{group}',[FileController::class,'index']);
     Route::post('/',[FileController::class,'store']);
     Route::patch('/lock',[FileController::class,'lock']);
-    Route::get('/pull/{file}',[FileController::class,'pull']);
+    //Route::get('/pull/{file}',[FileController::class,'pull']);
    // Route::patch('/{file}',[FileController::class,'update']);
-    Route::get('/{file}',[FileController::class,'show']);
+    //Route::get('/{file}',[FileController::class,'show']);
     Route::delete('/{file}',[FileController::class,'destroy']);
     
 });

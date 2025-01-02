@@ -10,15 +10,31 @@ class GroupPolicy
 {
     public function createFile(User $user, Group $group): bool
     {
-        if($group->user_id === $user->id)
-            return true;
-        return false;
+
+        return (
+            $group->type === 'public'||
+            $group->user_id === $user->id ||
+            $group->memberships()->where('user_id',$user->id)->wherePivot('role','writer')->first()
+        );
+
     }
-    public function pullFile(User $user, Group $group): bool
+    public function view(User $user, Group $group): bool
     {
-        if($group->user_id === $user->id)
-            return true;
-        return false;
+        return (
+            $group->type === 'public'||
+            $group->user_id === $user->id ||
+            $group->memberships()->where('user_id',$user->id)->first()
+        ); 
     }
+    public function update(User $user, Group $group): bool
+    {
+        return ($group->user_id === $user->id); 
+    }
+    public function delete(User $user, Group $group): bool
+    {
+        return ($group->user_id === $user->id); 
+    }
+
+
 
 }
