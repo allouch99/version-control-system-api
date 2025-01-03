@@ -16,19 +16,27 @@ class InvitationSeeder extends Seeder
     public function run(): void
     {
         Invitation::factory()
-            ->for(User::where('user_name', 'ali')->first())
             ->for(Group::find(4))
-            ->state(['sent_id' => '2','status' => 'accepted'])
+            ->state([
+                'sent_id' => '2',
+                'recipient_id'=> '1',
+                'status' => 'accepted'
+                ])
             ->create();
         Invitation::factory()
-            ->for(User::where('user_name', 'ali')->first())
             ->for(Group::find(6))
-            ->state(['sent_id' => '3','status' => 'accepted'])
+            ->state([
+                'sent_id' => '3',
+                'recipient_id'=> '1',
+                'status' => 'accepted'
+                ])
             ->create();
         Invitation::factory()
-            ->for(User::where('user_name', 'jacob')->first())
             ->for(Group::find(2))
-            ->state(['sent_id' => '1'])
+            ->state([
+                'sent_id' => '1',
+                'recipient_id'=> '2'
+                ])
             ->create();
 
     }

@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('invitations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('group_id')->constrained('groups')->cascadeOnDelete();
+            $table->foreignId('recipient_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('sent_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('group_id')->constrained('groups')->cascadeOnDelete();
             $table->enum('role',['viewer','writer'])->default('viewer');
             $table->enum('status',['accepted','rejected','unread'])->default('unread');
             $table->string('description');

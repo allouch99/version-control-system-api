@@ -3,30 +3,24 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\Group;
 use App\Models\Invitation;
+use App\Models\Membership;
 use App\Services\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Str;
-use Closure;
 
 class InvitationService extends Service
 {
-    public function index(string $type)
+    public function index()
     {
         $user = User::find(Auth::id());
-    
-        if($type == 'sent'){
-            $nvitations = $user->setInvitations()->get();
-        }else if($type == 'received'){
-            $nvitations = $user->invitations()->get();
-        }else{
-            $nvitations = $user->invitations()->get();
-        }
+        $nvitations = [
+            'sent-invitations' => $user->sentInvitations()->get(),
+            'received-invitations' => $user->receivedInvitations()->get()
+        ];
+
         return $this->responseService->status(200)->data($nvitations);
     }
     public function store(Request $request)
@@ -36,34 +30,69 @@ class InvitationService extends Service
         if ($errors) {
             return $this->responseService->message($errors)->status(404)->error(true);
         }
+        $user = User::find(Auth::id());
+
+        if ($user->cannot('create-invitation',$request)) {
+            return $this->responseService->message('unauthorized')
+                ->status(403)->error(true);
+        }
         $data = [
             'group_id' => $request['group_id'],
-            'sender_id' =>Auth::id(),
+            'sent_id' =>Auth::id(),
             'recipient_id' => $request['recipient_id'],
             'role' => $request['role'],
             'description' => $request['description'],
         ];
-        Invitation::create($data);
+        $invitation = Invitation::create($data);
         
-        return $this->responseService->message('The group has been created successfully')
-            ->status(201)->data($data);
+        return $this->responseService->message('The invitation has been created successfully')
+            ->status(201)->data($invitation);
     }
   
     public function destroy(Invitation $invitation)
     {
+        $user = User::find(Auth::id());
+        if ($user->cannot('delete',$invitation)) {
+            return $this->responseService->message('unauthorized')
+                ->status(403)->error(true);
+        }
         $invitation->delete();
-        return $this->responseService->message('The invitation has been created successfully')
-            ->status(204);
+        return $this->responseService->message('The invitation has been deleted successfully')
+            ->status(201);
+    }
+    public function accept(Invitation $invitation)
+    {
+        $user = User::find(Auth::id());
+        if ($user->cannot('change-status',$invitation)) {
+            return $this->responseService->message('unauthorized')
+                ->status(403)->error(true);
+        }
+        Membership::create([
+            'user_id' => $invitation['recipient_id'],
+            'group_id' => $invitation['group_id'],
+            'role' => $invitation['role'],
+        ]);
+        $invitation->status = 'accepted';
+        $invitation->save();
+        return $this->responseService->message('The invitation has been accepted successfully')
+            ->status(201);
+    }
+    public function reject(Invitation $invitation)
+    {
+        $user = User::find(Auth::id());
+        if ($user->cannot('change-status',$invitation)) {
+            return $this->responseService->message('unauthorized')
+                ->status(403)->error(true);
+        }
+        $invitation->status = 'rejected';
+        $invitation->save();
+        return $this->responseService->message('The invitation has been rejected successfully')
+            ->status(201);
     }
     protected function rule(): array
     {
         return  [
-            'group_id' => ['required', 'integer','gt:0',
-            function (string $attribute, mixed $value, Closure $fail) {
-                if (!Auth::user()->groups->where('id', $value)->first()) {
-                    $fail("The specified {$attribute} is invalid.");
-                }
-            }, ],
+            'group_id' => ['required', 'integer','gt:0'],
             'recipient_id' => ['required', 'integer','gt:0'],
             'role'=>['required',  Rule::in(['viewer', 'writer']),],
             'description' => ['required', 'string', 'max:2048']

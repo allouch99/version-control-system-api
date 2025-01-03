@@ -42,10 +42,10 @@ Route::prefix('/files')->middleware('auth:sanctum')->group(function () {
 
 
 Route::prefix('invitations')->middleware('auth:sanctum')->group(function () {
-    Route::get('/{type}',[InvitationController::class,'index'])
-        ->whereIn('type', ['sent', 'received']);
-    Route::post('/{invitation}/accept',[InvitationController::class,'accept']);
+    Route::get('/',[InvitationController::class,'index']);
     Route::post('/',[InvitationController::class,'store']);
+    Route::post('/{invitation}/accept',[InvitationController::class,'accept']);
+    Route::post('/{invitation}/reject',[InvitationController::class,'reject']);
     Route::delete('/{invitation}',[InvitationController::class,'destroy']);
 
 });

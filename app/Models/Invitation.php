@@ -10,16 +10,20 @@ class Invitation extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'user_id',
+        'recipient_id',
         'group_id',
         'sent_id',
         'role',
         'description',
     ];
 
-    public function user()
+    public function sentUser()
     {
-        return $this->belongsTo(User::class,'user_id');
+        return $this->belongsTo(User::class,'sent_id');
+    } 
+    public function receivedUser()
+    {
+        return $this->belongsTo(User::class,'recipient_id');
     } 
     public function group()
     {

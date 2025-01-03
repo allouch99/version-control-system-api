@@ -13,17 +13,21 @@ class InvitationController extends Controller
     {
         $this->invitationService = $invitationService;
     }
-    public function index(string $type = 'all')
+    public function index()
     {
-        return  $this->invitationService->index($type)->jsonResponse();
+        return  $this->invitationService->index()->jsonResponse();
     }
     public function store(Request $request)
     {
         return  $this->invitationService->store($request)->jsonResponse();
     }
-    public function accept(Request $request)
+    public function accept(Invitation $invitation)
     {
-        return  $this->invitationService->store($request)->jsonResponse();
+        return  $this->invitationService->accept($invitation)->jsonResponse();
+    }
+    public function reject(Invitation $invitation)
+    {
+        return  $this->invitationService->reject($invitation)->jsonResponse();
     }
     public function destroy(Invitation $invitation)
     {
