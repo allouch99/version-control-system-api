@@ -30,12 +30,11 @@ Route::prefix('groups')->middleware('auth:sanctum')->group(function () {
 
 });
 Route::prefix('/files')->middleware('auth:sanctum')->group(function () {
-    Route::get('/{group}',[FileController::class,'index']);
     Route::post('/',[FileController::class,'store']);
     Route::patch('/lock',[FileController::class,'lock']);
-    //Route::get('/pull/{file}',[FileController::class,'pull']);
-   // Route::patch('/{file}',[FileController::class,'update']);
-    //Route::get('/{file}',[FileController::class,'show']);
+    Route::patch('/unlock',[FileController::class,'unlock']);
+    Route::get('/{file}',[FileController::class,'show']);
+    Route::patch('/{file}',[FileController::class,'update']);
     Route::delete('/{file}',[FileController::class,'destroy']);
     
 });

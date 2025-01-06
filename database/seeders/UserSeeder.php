@@ -21,5 +21,6 @@ class UserSeeder extends Seeder
                 ['name' => 'Lith', 'user_name' => 'lith', 'email' => 'lith@gmail.com']
             )
             ->create();
+        User::factory()->count(17)->create();
     }
 }
