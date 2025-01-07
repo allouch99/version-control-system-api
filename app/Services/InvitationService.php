@@ -31,7 +31,10 @@ class InvitationService extends Service
             return $this->responseService->message($errors)->status(404)->error(true);
         }
         $user = User::find(Auth::id());
-
+        $recipient = User::where('email',$request['recipient_email'])->first();
+        if(!$recipient){
+            return $this->responseService->message('The specified email is invalid.')->status(404)->error(true);
+        }
         if ($user->cannot('create-invitation',$request)) {
             return $this->responseService->message('unauthorized')
                 ->status(403)->error(true);
@@ -39,12 +42,12 @@ class InvitationService extends Service
         $data = [
             'group_id' => $request['group_id'],
             'sent_id' =>Auth::id(),
-            'recipient_id' => $request['recipient_id'],
+            'recipient_id' =>  $recipient->id,
             'role' => $request['role'],
             'description' => $request['description'],
         ];
         $invitation = Invitation::create($data);
-        
+        $data['recipient_email'] = $request['recipient_email'];
         return $this->responseService->message('The invitation has been created successfully')
             ->status(201)->data($invitation);
     }
@@ -93,7 +96,7 @@ class InvitationService extends Service
     {
         return  [
             'group_id' => ['required', 'integer','gt:0'],
-            'recipient_id' => ['required', 'integer','gt:0'],
+            'recipient_email' => ['required', 'string','email'],
             'role'=>['required',  Rule::in(['viewer', 'writer']),],
             'description' => ['required', 'string', 'max:2048']
         ];

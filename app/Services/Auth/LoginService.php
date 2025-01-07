@@ -12,7 +12,7 @@ class LoginService extends Service
     public function rule(): array
     {
         return [
-            'email' => ['required', 'string'],
+            'email' => ['required', 'string','email'],
             'password' => ['required', 'string'],
         ];
     }

@@ -7,7 +7,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Notification;
 use App\Models\File;
 use App\Models\User;
-use App\Notifications\FileLocked;
+use App\Notifications\FileStatus;
 
 class LockFileJob implements ShouldQueue
 {
@@ -32,7 +32,7 @@ class LockFileJob implements ShouldQueue
             //$users = User::where('id','<>','2')->get();
         }
         $users = User::where('id','<>','2')->get();
-        Notification::send($users, new FileLocked('the file lock suc'));
+        Notification::send($users, new FileStatus('the file lock suc'));
         
     }
 }

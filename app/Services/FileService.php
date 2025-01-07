@@ -69,8 +69,10 @@ class FileService extends Service
         if (!Storage::disk('local')->exists($file->path)) {
             throw new Exception('The file does not exist.', 404);
         }
-
+        
         Storage::putFileAs($file['directory'], $request['file'], $file['name']);
+
+
 
         $file->updated_at = now();
         $file->save();

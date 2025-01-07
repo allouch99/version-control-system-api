@@ -21,7 +21,7 @@ class Group extends Model
         'bg_image_url',
         'icon_image_url'
     ];
-    
+
     protected function filesDirectory(): Attribute
     {
         return Attribute::make(
@@ -83,3 +83,5 @@ class Group extends Model
                 ->withPivot('role');
     }
 }
+
+
