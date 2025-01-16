@@ -8,12 +8,15 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\ReportController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-
+Route::get('/users', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
 
 Route::prefix('auth')->group(function () {
     Route::post('/register',[RegisterController::class,'register']);
@@ -42,9 +45,16 @@ Route::prefix('/files')->middleware('auth:sanctum')->group(function () {
 
 Route::prefix('invitations')->middleware('auth:sanctum')->group(function () {
     Route::get('/',[InvitationController::class,'index']);
+    Route::get('/users/{group}',[InvitationController::class,'getAllowedUsers']);
     Route::post('/',[InvitationController::class,'store']);
     Route::post('/{invitation}/accept',[InvitationController::class,'accept']);
     Route::post('/{invitation}/reject',[InvitationController::class,'reject']);
     Route::delete('/{invitation}',[InvitationController::class,'destroy']);
+
+});
+
+Route::prefix('reports')->middleware('auth:sanctum')->group(function () {
+    Route::get('/file/{file}',[ReportController::class,'getFileReport']);
+    Route::get('/user/{user}/group/{group}',[ReportController::class,'getUserReport']);
 
 });

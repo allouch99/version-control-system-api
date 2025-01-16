@@ -13,6 +13,7 @@ class GroupSeeder extends Seeder
      */
     public function run(): void
     {
+
          Group::factory()
                 ->count(2)
                 ->for(User::where('user_name','ali')->first())
@@ -72,5 +73,7 @@ class GroupSeeder extends Seeder
                 ]
                 )
                 ->create();
+
+                Group::factory()->count(24)->create();
     }
 }

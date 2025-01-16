@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Group;
 use App\Models\Invitation;
 use Illuminate\Http\Request;
 use App\Services\InvitationService;
@@ -12,6 +13,10 @@ class InvitationController extends Controller
     public function __construct(InvitationService $invitationService)
     {
         $this->invitationService = $invitationService;
+    }
+    public function getAllowedUsers(Group $group)
+    {
+        return  $this->invitationService->getAllowedUsers($group)->jsonResponse();
     }
     public function index()
     {

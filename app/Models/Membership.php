@@ -14,7 +14,8 @@ class Membership extends Model
     
     protected $fillable = [
         'user_id',
-        'group_id'
+        'group_id',
+        'role'
     ];
 
     public function user():BelongsTo

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Group;
 use App\Models\User;
 use App\Models\Invitation;
 use App\Models\Membership;
@@ -10,9 +11,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 
 class InvitationService extends Service
 {
+    public function getAllowedUsers(Group $group)
+    {
+        $user = User::find(Auth::id());
+        if ($user->cannot('get-users',$group)) {
+            return $this->responseService->message('unauthorized')
+                ->status(403)->error(true);
+        }
+        $recipient_id = $group->invitations->pluck('recipient_id');
+        $membership_id =  $group->memberships->pluck('membership.user_id');
+        $invalid_ids = collect([$recipient_id, $membership_id,[$group->user_id]])->collapse()->all();
+        $users = User::whereNotIn('id',$invalid_ids)->get();
+
+        return $this->responseService->status(200)->data($users->pluck('email'));
+    }
     public function index()
     {
         $user = User::find(Auth::id());

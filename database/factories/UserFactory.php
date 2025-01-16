@@ -23,7 +23,7 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        $user_name = fake()->unique()->firstName();
+        $user_name = fake()->unique()->userName();
         return [
             'name' => $user_name . ' ' .fake()->lastName(),
             'user_name' => $user_name,

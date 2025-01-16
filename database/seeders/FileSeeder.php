@@ -92,5 +92,7 @@ class FileSeeder extends Seeder
             ['name' => 'bootstrap.css'],
         )
         ->create();
+
+        File::factory()->count(100)->create();
     }
 }

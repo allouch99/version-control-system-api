@@ -12,6 +12,13 @@ class InvitationPolicy
 {
 
 
+    public function getUsers(User $user ,Group $group): bool
+    {
+        if (!$user->groups->where('id',$group['id'])->first())
+            return false;
+
+        return true;
+    }
     public function create(User $user ,Request $request): bool
     {
         if (!$user->groups->where('id',$request['group_id'])->first() || $user->id == $request['recipient_id'])

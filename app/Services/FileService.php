@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\Report\CreateReport;
 use App\Jobs\LockFileJob;
 use App\Models\User;
 use App\Models\File;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Exception;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Str;
 class FileService extends Service
 {
     public function store(Request $request)
@@ -31,7 +32,7 @@ class FileService extends Service
                     ->status(403)->error(true);
             }
             $file = [
-                'name' => $request['file']->getClientOriginalName(),
+                'name' => Str::slug($request['file']->getClientOriginalName(), '-'),
                 'contents' => $request['file'],
                 'directory' => $group->filesDirectory,
             ];
@@ -41,10 +42,11 @@ class FileService extends Service
             if (Storage::disk('local')->exists($path)) {
                 throw new Exception('The file already exists.', 404);
             }
-
+           
             Storage::putFileAs($file['directory'], $file['contents'], $file['name']);
-            $group->files()->create($file);
-
+            
+            $file = $group->files()->create($file);
+            event(new CreateReport($user,$file));
             return $this->responseService->message('The file has been created successfully')
                 ->status(201);
         } catch (Exception $exception) {
@@ -61,7 +63,7 @@ class FileService extends Service
         if ($errors)
             return $this->responseService->message($errors)->status(404)->error(true);
         $user = User::find(Auth::id());
-        if ($user->cannot('update', $file , $request['file']->getClientOriginalName())) {
+        if ($user->cannot('update', $file ) ||  $request['file']->getClientOriginalName() != $file['name']) {
             return $this->responseService->message('unauthorized')
                 ->status(403)->error(true);
         }
@@ -69,7 +71,7 @@ class FileService extends Service
         if (!Storage::disk('local')->exists($file->path)) {
             throw new Exception('The file does not exist.', 404);
         }
-        
+
         Storage::putFileAs($file['directory'], $request['file'], $file['name']);
 
 

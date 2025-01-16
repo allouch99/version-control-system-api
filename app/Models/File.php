@@ -18,6 +18,15 @@ class File extends Model
         'directory'
     ];
 
+    protected function report(): Attribute
+    {
+        $name = pathinfo($this->attributes['name'], PATHINFO_FILENAME).'.log';
+        return Attribute::make(
+            get: fn () => (
+                $this->attributes['directory'] . 'file-reports/' . $name 
+            )    
+        );
+    }
     protected function path(): Attribute
     {
         return Attribute::make(
@@ -39,4 +48,5 @@ class File extends Model
     {
         return $this->belongsTo(Group::class, 'group_id');
     }
+
 }

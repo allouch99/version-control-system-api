@@ -22,8 +22,8 @@ class FilePolicy
     {
         return ( $user->id == $file->locked_by);
     }
-    public function update(User $user, File $file , string $file_updated_name): bool
+    public function update(User $user, File $file ): bool
     {
-        return ( $user->id == $file->locked_by && $file_updated_name === $file['name']);
+        return ( $user->id == $file->locked_by );
     }
 }

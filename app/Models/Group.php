@@ -75,6 +75,10 @@ class Group extends Model
     {
         return $this->hasMany(File::class,'group_id');
     }
+    public function invitations():HasMany
+    {
+        return $this->hasMany(Invitation::class,'group_id');
+    }
 
     public function memberships(): BelongsToMany
     {
