@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('locked_by')->nullable()->default(null)->constrained('users')->cascadeOnDelete();
             $table->string('name');
             $table->string('directory');
+            $table->integer('version')->default(0);
             $table->timestamps();
         });
     }

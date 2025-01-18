@@ -13,11 +13,43 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Exception;
-use Illuminate\Contracts\Database\Query\Builder;
+
+use Illuminate\Database\Eloquent\Builder ;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+
 class FileService extends Service
 {
+    public function getVersions(File $file)
+    {
+        $versions = collect() ;
+        if($file->version > 0){
+            for($i=0 ;$i < $file->version ;$i++)
+            {
+                
+                $versions->put( 'version-'.$i , Storage::temporaryUrl(
+                    $file['directory'].'versions/'.$i.'/'.$file['name'],
+                     now()->addMinutes(5))) ;
+            }
+        }
+
+        return $this->responseService->data($versions)
+                ->status(201);
+    }
+    public function setVersion(File $file,$version)
+    {
+
+        if (!is_numeric($version) || $version < 0)
+            return $this->responseService->message('invalid version')->status(404)->error(true);
+        $user = User::find(Auth::id());
+        if ($user->cannot('set-version', $file)) {
+            return $this->responseService->message('unauthorized')
+                ->status(403)->error(true);
+        }
+        return $this->responseService->message('The specified version has been reverted.')
+                ->status(201);
+    }
     public function store(Request $request)
     {
         $errors = Validator::make($request->all(), $this->rule())->errors()->all();
@@ -42,11 +74,11 @@ class FileService extends Service
             if (Storage::disk('local')->exists($path)) {
                 throw new Exception('The file already exists.', 404);
             }
-           
+
             Storage::putFileAs($file['directory'], $file['contents'], $file['name']);
-            
+
             $file = $group->files()->create($file);
-            event(new CreateReport($user,$file));
+            event(new CreateReport($user, $file));
             return $this->responseService->message('The file has been created successfully')
                 ->status(201);
         } catch (Exception $exception) {
@@ -56,14 +88,14 @@ class FileService extends Service
     }
     public function update(Request $request, File $file)
     {
-        
+
         $errors = Validator::make($request->all(), [
             'file' => ['required', 'file', 'max:20480']
         ])->errors()->all();
         if ($errors)
             return $this->responseService->message($errors)->status(404)->error(true);
         $user = User::find(Auth::id());
-        if ($user->cannot('update', $file ) ||  $request['file']->getClientOriginalName() != $file['name']) {
+        if ($user->cannot('update', $file) ||  $request['file']->getClientOriginalName() != $file['name']) {
             return $this->responseService->message('unauthorized')
                 ->status(403)->error(true);
         }
@@ -72,10 +104,13 @@ class FileService extends Service
             throw new Exception('The file does not exist.', 404);
         }
 
+        
+
+
+        Storage::copy($file->path,$file['directory'].'versions/'.$file->version.'/'.$file['name']);
         Storage::putFileAs($file['directory'], $request['file'], $file['name']);
-
-
-
+        
+        $file->version++;
         $file->updated_at = now();
         $file->save();
 
@@ -98,16 +133,24 @@ class FileService extends Service
     public function lock(Request $request)
     {
         $errors = Validator::make($request->all(), [
-            'files_id' => ['required','regex:/^(\d+)\s*(,\s*(\d+)\s*)*$/i']
+            'files_id' => ['required', 'array']
         ])->errors()->all();
         if ($errors)
             return $this->responseService->message($errors)->status(404)->error(true);
 
-        $files_id = array_unique(explode(',', $request->input('files_id')));
+        $files_id = array_unique($request->input('files_id'));
+        //LockFileJob::dispatch($files_id,Auth::id());
+        DB::transaction(function () {
+            DB::update('update users set votes = 1');
 
-        LockFileJob::dispatch($files_id,Auth::id());
-
-
+            DB::delete('delete from posts');
+        });
+        if (!File::whereIn('id', $files_id)->whereNotNull('locked_by')->first()) {
+            File::whereIn('id', $files_id)->update(['locked_by' => Auth::id()]);
+            //$file = File::whereIn('id',$files_id)->first();
+            //$users = User::where('id','<>','2')->get();
+        }
+        $t = File::whereIn('id', $files_id)->ddRawSql();
         return $this->responseService->message('The request is currently being processed. You will receive a notification of the result.')
             ->status(200);
     }
@@ -115,18 +158,20 @@ class FileService extends Service
     public function unlock(Request $request)
     {
         $errors = Validator::make($request->all(), [
-            'files_id' => ['required','regex:/^(\d+)\s*(,\s*(\d+)\s*)*$/i']
+            'files_id' => ['required', 'array']
         ])->errors()->all();
         if ($errors)
             return $this->responseService->message($errors)->status(404)->error(true);
 
-        $files_id = array_unique(explode(',', $request->input('files_id')));
-        if (File::whereIn('id', $files_id)
+        $files_id = array_unique($request->input('files_id'));
+        $invalid_ids = File::whereIn('id', $files_id)
             ->where(function (Builder $query) {
-                        $query->where('locked_by','!=',Auth::id())
-                            ->orWhere('locked_by',null);
-                            })->first()
-                            ) {
+                $query->where('locked_by',  '!=', Auth::id())
+                     ->orWhere('locked_by', null);
+            })->first();
+
+
+        if ($invalid_ids) {
             return $this->responseService->message('unauthorized')->status(404)->error(true);
         }
 
@@ -156,7 +201,10 @@ class FileService extends Service
     {
         return  [
             'file' => ['required', 'file', 'max:20480'],
-            'group_id' => [ 'required', 'integer', 'gt:0',
+            'group_id' => [
+                'required',
+                'integer',
+                'gt:0',
                 function (string $attribute, mixed $value, Closure $fail) {
                     if (!Group::where('id', $value)->first()) {
                         $fail("Invalid {$attribute}.");

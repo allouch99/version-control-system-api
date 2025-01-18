@@ -21,9 +21,13 @@ class InvitationPolicy
     }
     public function create(User $user ,Request $request): bool
     {
-        if (!$user->groups->where('id',$request['group_id'])->first() || $user->id == $request['recipient_id'])
+        if(!$request['recipient'])
             return false;
-
+        if (!$user->groups->where('id',$request['group_id'])->first())
+            return false;
+        if(collect( $request['invalid_ids'])->contains($request['recipient']->id))
+            return false;
+        
         return true;
     }
 

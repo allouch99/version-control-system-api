@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Http\Resources\FileResource;
+use App\Http\Resources\GroupResource;
 use App\Models\User;
 use App\Models\Group;
 use App\Services\Service;
@@ -68,11 +70,8 @@ class GroupService extends Service
             return $this->responseService->message('unauthorized')
                 ->status(403)->error(true);
         }
-        $data = [
-            'group' => $group ,
-            'files' => $group->files()->get()
-        ];
-        return $this->responseService->data($data);
+        
+        return $this->responseService->data(new GroupResource($group));
     }
     public function update(Request $request ,Group $group)
     {

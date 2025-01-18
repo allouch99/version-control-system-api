@@ -14,6 +14,14 @@ class FileController extends Controller
     }
 
 
+    public function getVersions(File $file)
+    {
+        return $this->fileService->getVersions($file)->jsonResponse();
+    }
+    public function setVersion(File $file,$version)
+    {
+        return $this->fileService->setVersion($file,$version)->jsonResponse();
+    }
     public function store(Request $request)
     {
         return $this->fileService->store($request)->jsonResponse();

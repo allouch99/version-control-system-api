@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Resources\InvitationResource;
 use App\Models\Group;
 use App\Models\User;
 use App\Models\Invitation;
@@ -15,28 +16,39 @@ use Illuminate\Support\Facades\DB;
 
 class InvitationService extends Service
 {
+    protected $user;
+    public function __construct(ResponseService $responseService)
+    {
+        parent::__construct($responseService);
+        $this->user = User::find(Auth::id());   
+    }
     public function getAllowedUsers(Group $group)
     {
-        $user = User::find(Auth::id());
-        if ($user->cannot('get-users',$group)) {
+        
+        if ($this->user->cannot('get-users',$group)) {
             return $this->responseService->message('unauthorized')
                 ->status(403)->error(true);
         }
-        $recipient_id = $group->invitations->pluck('recipient_id');
-        $membership_id =  $group->memberships->pluck('membership.user_id');
-        $invalid_ids = collect([$recipient_id, $membership_id,[$group->user_id]])->collapse()->all();
+    
+        $invalid_ids = $this->getInvalidUsersId($group);
         $users = User::whereNotIn('id',$invalid_ids)->get();
 
         return $this->responseService->status(200)->data($users->pluck('email'));
     }
+    protected function getInvalidUsersId(Group $group)
+    {
+        $recipient_id = $group->invitations->pluck('recipient_id');
+        $membership_id =  $group->memberships->pluck('membership.user_id');
+        $invalid_ids = collect([$recipient_id, $membership_id,[$group->user_id]])->collapse()->all();
+        return $invalid_ids;
+    }
     public function index()
     {
-        $user = User::find(Auth::id());
         $nvitations = [
-            'sent-invitations' => $user->sentInvitations()->get(),
-            'received-invitations' => $user->receivedInvitations()->get()
+            'sent-invitations' => InvitationResource::collection($this->user->sentInvitations()->get()),
+            'received-invitations' => InvitationResource::collection( $this->user->receivedInvitations()->get())
         ];
-
+        
         return $this->responseService->status(200)->data($nvitations);
     }
     public function store(Request $request)
@@ -46,19 +58,19 @@ class InvitationService extends Service
         if ($errors) {
             return $this->responseService->message($errors)->status(404)->error(true);
         }
-        $user = User::find(Auth::id());
-        $recipient = User::where('email',$request['recipient_email'])->first();
-        if(!$recipient){
-            return $this->responseService->message('The specified email is invalid.')->status(404)->error(true);
-        }
-        if ($user->cannot('create-invitation',$request)) {
+        $request['recipient'] = User::where('email',$request['recipient_email'])->first();
+        $request['invalid_ids']  = $this->getInvalidUsersId(Group::find($request['group_id']));
+        if ($this->user->cannot('create-invitation',$request)) {
             return $this->responseService->message('unauthorized')
                 ->status(403)->error(true);
         }
+
+
+        
         $data = [
             'group_id' => $request['group_id'],
             'sent_id' =>Auth::id(),
-            'recipient_id' =>  $recipient->id,
+            'recipient_id' =>  $request['recipient']->id,
             'role' => $request['role'],
             'description' => $request['description'],
         ];
@@ -70,8 +82,7 @@ class InvitationService extends Service
   
     public function destroy(Invitation $invitation)
     {
-        $user = User::find(Auth::id());
-        if ($user->cannot('delete',$invitation)) {
+        if ($this->user->cannot('delete',$invitation)) {
             return $this->responseService->message('unauthorized')
                 ->status(403)->error(true);
         }
@@ -81,8 +92,7 @@ class InvitationService extends Service
     }
     public function accept(Invitation $invitation)
     {
-        $user = User::find(Auth::id());
-        if ($user->cannot('change-status',$invitation)) {
+        if ($this->user->cannot('change-status',$invitation)) {
             return $this->responseService->message('unauthorized')
                 ->status(403)->error(true);
         }
@@ -98,8 +108,7 @@ class InvitationService extends Service
     }
     public function reject(Invitation $invitation)
     {
-        $user = User::find(Auth::id());
-        if ($user->cannot('change-status',$invitation)) {
+        if ($this->user->cannot('change-status',$invitation)) {
             return $this->responseService->message('unauthorized')
                 ->status(403)->error(true);
         }

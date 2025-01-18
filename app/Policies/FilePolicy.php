@@ -20,10 +20,14 @@ class FilePolicy
     }
     public function show(User $user, File $file): bool
     {
-        return ( $user->id == $file->locked_by);
+        return ( $user->id === $file->locked_by);
     }
     public function update(User $user, File $file ): bool
     {
-        return ( $user->id == $file->locked_by );
+        return ( $user->id === $file->locked_by );
+    }
+    public function setVersion(User $user, File $file ): bool
+    {
+        return ( $user->id === $file->locked_by );
     }
 }

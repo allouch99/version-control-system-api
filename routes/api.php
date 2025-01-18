@@ -34,6 +34,8 @@ Route::prefix('groups')->middleware('auth:sanctum')->group(function () {
 });
 Route::prefix('/files')->middleware('auth:sanctum')->group(function () {
     Route::post('/',[FileController::class,'store']);
+    Route::get('/{file}/versions',[FileController::class,'getVersions']);
+    Route::patch('/{file}/versions/{version}',[FileController::class,'setVersion']);
     Route::patch('/lock',[FileController::class,'lock']);
     Route::patch('/unlock',[FileController::class,'unlock']);
     Route::get('/{file}',[FileController::class,'show']);
