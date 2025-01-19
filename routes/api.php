@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
 
 Route::get('/user', function (Request $request) {
@@ -58,5 +59,9 @@ Route::prefix('invitations')->middleware('auth:sanctum')->group(function () {
 Route::prefix('reports')->middleware('auth:sanctum')->group(function () {
     Route::get('/file/{file}',[ReportController::class,'getFileReport']);
     Route::get('/user/{user}/group/{group}',[ReportController::class,'getUserReport']);
-
+});
+Route::prefix('notifications')->middleware('auth:sanctum')->group(function () {
+    Route::get('/',[NotificationController::class,'index']);
+    Route::get('/unread',[NotificationController::class,'unread']);
+    Route::post('/set-all-read',[NotificationController::class,'markAsRead']);
 });

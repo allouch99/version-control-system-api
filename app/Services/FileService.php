@@ -26,8 +26,7 @@ class FileService extends Service
         $versions = collect() ;
         if($file->version > 0){
             for($i=0 ;$i < $file->version ;$i++)
-            {
-                
+            {  
                 $versions->put( 'version-'.$i , Storage::temporaryUrl(
                     $file['directory'].'versions/'.$i.'/'.$file['name'],
                      now()->addMinutes(5))) ;
@@ -139,18 +138,9 @@ class FileService extends Service
             return $this->responseService->message($errors)->status(404)->error(true);
 
         $files_id = array_unique($request->input('files_id'));
-        //LockFileJob::dispatch($files_id,Auth::id());
-        DB::transaction(function () {
-            DB::update('update users set votes = 1');
+        $user = User::find(Auth::id());
+        LockFileJob::dispatch($files_id,$user);
 
-            DB::delete('delete from posts');
-        });
-        if (!File::whereIn('id', $files_id)->whereNotNull('locked_by')->first()) {
-            File::whereIn('id', $files_id)->update(['locked_by' => Auth::id()]);
-            //$file = File::whereIn('id',$files_id)->first();
-            //$users = User::where('id','<>','2')->get();
-        }
-        $t = File::whereIn('id', $files_id)->ddRawSql();
         return $this->responseService->message('The request is currently being processed. You will receive a notification of the result.')
             ->status(200);
     }

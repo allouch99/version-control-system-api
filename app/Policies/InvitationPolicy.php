@@ -25,7 +25,7 @@ class InvitationPolicy
             return false;
         if (!$user->groups->where('id',$request['group_id'])->first())
             return false;
-        if(collect( $request['invalid_ids'])->contains($request['recipient']->id))
+        if(collect($request['invalid_ids'])->contains($request['recipient']->id))
             return false;
         
         return true;
