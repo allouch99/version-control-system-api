@@ -28,7 +28,10 @@ class GroupController extends Controller
     public function show(Group $group)
     {
         return  $this->groupService->show($group)->jsonResponse();
-
+    }
+    public function usersInGroup(Group $group)
+    {
+        return  $this->groupService->usersInGroup($group)->jsonResponse();
     }
 
 

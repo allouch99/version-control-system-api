@@ -29,6 +29,7 @@ Route::prefix('groups')->middleware('auth:sanctum')->group(function () {
     Route::get('/',[GroupController::class,'index']);
     Route::post('/',[GroupController::class,'store']);
     Route::patch('/{group}',[GroupController::class,'update']);
+    Route::get('/{group}/users',[GroupController::class,'usersInGroup']);
     Route::get('/{group}',[GroupController::class,'show']);
     Route::delete('/{group}',[GroupController::class,'destroy']);
 

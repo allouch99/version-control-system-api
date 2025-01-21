@@ -73,6 +73,16 @@ class GroupService extends Service
         
         return $this->responseService->data(new GroupResource($group));
     }
+    public function usersInGroup(Group $group)
+    {
+        $user = User::find(Auth::id());
+        if ($user->cannot('view', $group)) {
+            return $this->responseService->message('unauthorized')
+                ->status(403)->error(true);
+        }
+        
+        return $this->responseService->data($group->memberships);
+    }
     public function update(Request $request ,Group $group)
     {
         $user = User::find(Auth::id());
