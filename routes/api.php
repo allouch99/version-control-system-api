@@ -58,7 +58,7 @@ Route::prefix('invitations')->middleware('auth:sanctum')->group(function () {
 
 Route::prefix('reports')->middleware('auth:sanctum')->group(function () {
     Route::get('/file/{file}',[ReportController::class,'getFileReport']);
-    Route::get('/user/{user}/group/{group}',[ReportController::class,'getUserReport']);
+    Route::get('/group/{group}',[ReportController::class,'getUserReport']);
 });
 Route::prefix('notifications')->middleware('auth:sanctum')->group(function () {
     Route::get('/',[NotificationController::class,'index']);

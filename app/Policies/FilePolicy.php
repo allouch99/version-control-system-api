@@ -26,7 +26,11 @@ class FilePolicy
     {
         return ( $user->id === $file->locked_by );
     }
-    public function setVersion(User $user, File $file ): bool
+    public function getVersion(User $user, File $file): bool
+    {
+        return ( $user->id === $file->group->user_id ||$file->group->memberships->pluck('id')->contains($user->id)  );
+    }
+    public function setVersion(User $user, File $file): bool
     {
         return ( $user->id === $file->locked_by );
     }

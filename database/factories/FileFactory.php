@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Events\Report\CreateReport;
+use App\Events\Report\AppendReport;
 use App\Models\Group;
 use App\Models\File;
 use Illuminate\Support\Facades\Storage;
@@ -40,7 +40,7 @@ class FileFactory extends Factory
             $contents = fake()->sentence(10) ."\n";
             $contents = $contents . $contents . $contents . $contents;
             Storage::put($file->directory . $file->name, $contents);
-            event(new CreateReport($file->group->user,$file));
+            event(new AppendReport($file->group->user,$file,'create'));
         });
     }
 }

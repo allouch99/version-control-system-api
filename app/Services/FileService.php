@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Events\Report\CreateReport;
+use App\Events\Report\AppendReport;
 use App\Jobs\LockFileJob;
 use App\Models\User;
 use App\Models\File;
@@ -23,6 +23,11 @@ class FileService extends Service
 {
     public function getVersions(File $file)
     {
+        $user = User::find(Auth::id());
+        if ($user->cannot('get-version', $file)) {
+            return $this->responseService->message('unauthorized')
+                ->status(403)->error(true);
+        }
         $versions = collect() ;
         if($file->version > 0){
             for($i=0 ;$i < $file->version ;$i++)
@@ -77,7 +82,7 @@ class FileService extends Service
             Storage::putFileAs($file['directory'], $file['contents'], $file['name']);
 
             $file = $group->files()->create($file);
-            event(new CreateReport($user, $file));
+            event(new AppendReport($user, $file,'create'));
             return $this->responseService->message('The file has been created successfully')
                 ->status(201);
         } catch (Exception $exception) {
@@ -112,7 +117,7 @@ class FileService extends Service
         $file->version++;
         $file->updated_at = now();
         $file->save();
-
+        event(new AppendReport($user, $file,'update'));
         return $this->responseService->message('The file has been updated successfully')
             ->status(201);
     }
@@ -153,10 +158,11 @@ class FileService extends Service
         if ($errors)
             return $this->responseService->message($errors)->status(404)->error(true);
 
+        $user = User::find(Auth::id());
         $files_id = array_unique($request->input('files_id'));
         $invalid_ids = File::whereIn('id', $files_id)
-            ->where(function (Builder $query) {
-                $query->where('locked_by',  '!=', Auth::id())
+            ->where(function (Builder $query) use($user){
+                $query->where('locked_by',  '!=', $user->id)
                      ->orWhere('locked_by', null);
             })->first();
 
@@ -165,8 +171,13 @@ class FileService extends Service
             return $this->responseService->message('unauthorized')->status(404)->error(true);
         }
 
-        File::whereIn('id', $files_id)->update(['locked_by' => null]);
-
+        $files = File::whereIn('id', $files_id)->get();
+        foreach($files as $file){
+            $file->locked_by = null;
+            $file->save();
+            event(new AppendReport($user, $file,'unlock'));
+        }
+        
         return $this->responseService->message('Files unlocked successfully')
             ->status(200);
     }

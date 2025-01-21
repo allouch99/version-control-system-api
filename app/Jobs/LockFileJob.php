@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Events\Report\AppendReport;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Notification;
@@ -36,7 +37,13 @@ class LockFileJob implements ShouldQueue
         {
             $this->user->notify(new FileLocked('Error locking files. Make sure all selected files belong to the same group.'));
         }else {
-            File::whereIn('id', $this->files_id)->update(['locked_by' => $this->user->id]);
+
+            $files = File::whereIn('id', $this->files_id)->get();
+            foreach($files as $file){
+                $file->locked_by = $this->user->id;
+                $file->save();
+                event(new AppendReport($this->user, $file,'lock'));
+            }
             $files_name = File::whereIn('id', $this->files_id)->get()->implode('name', ', ');
             $message = 'User : [ '. $this->user->user_name.' ] locked the following files : ' .$files_name;
             $this->user->notify(new FileLocked('Files locked successfully : '.$files_name));

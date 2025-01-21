@@ -9,17 +9,24 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use App\Models\File;
+use App\Models\User;
 
-class UpdateReport
+class AppendReport
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct()
+    public File $file;
+    public User $user;
+    public string $process;
+    public function __construct(User $user,File $file,string $process)
     {
-        //
+        $this->user = $user;
+        $this->file = $file;
+        $this->process = $process;
     }
 
     /**

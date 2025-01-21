@@ -20,6 +20,6 @@ class ReportController extends Controller
     }
     public function getUserReport(User $user,Group $group)
     {
-        return  $this->reportService->getUserReport($user,$group)->jsonResponse();
+        return  $this->reportService->getUsersReport($group)->jsonResponse();
     }
 }

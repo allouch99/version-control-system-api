@@ -14,7 +14,8 @@ class GroupResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $users = UserResource::collection($this->memberships)  ;
+        $files = FileResource::collection($this->files()->get());
+        $users = UserResource::collection($this->memberships);
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -24,9 +25,11 @@ class GroupResource extends JsonResource
             'type' => $this->type,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'files' => FileResource::collection($this->files()->get()),
+            'files_count' => $files->count(),
+            'files' => $files,
             'owner' => new UserResource($this->user),
-            'users' => UserResource::collection($this->memberships),
+            'users_count' => $users->count(),
+            'users' => $users,
         ];
     }
 }

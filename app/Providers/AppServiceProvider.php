@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\File;
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Support\ServiceProvider;
 use App\Policies\InvitationPolicy;
@@ -27,9 +28,13 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('create-invitation', [InvitationPolicy::class, 'create']);
         Gate::define('create-file', [FilePolicy::class, 'create']);
         Gate::define('get-users', [InvitationPolicy::class, 'getUsers']);
-        // Gate::define('show-file-report', function (User $user, File $file) {
+        Gate::define('get-user-report', function (User $user, Group $group) {
 
-        //     return $user->id === $post->user_id;
-        // });
+            return $user->id === $group->user_id;
+        });
+        Gate::define('get-file-report', function (User $user, File $file) {
+
+            return  $user->id === $file->group->user_id ||$file->group->memberships->pluck('id')->contains($user->id) ;
+        });
     }
 }
