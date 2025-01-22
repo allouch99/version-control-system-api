@@ -20,9 +20,10 @@ class GroupService extends Service
     public function index()
     {
         $user = User::find(Auth::id());
-        $personalGroups = Group::Where('user_id',Auth::id())->get();
-        $publicGroups = Group::where('type','public')->WhereNot('user_id',Auth::id())->get();
-        $sharedGroups = $user->memberships()->get();
+        
+        $personalGroups = GroupResource::collection(Group::Where('user_id',Auth::id())->get());
+        $publicGroups = GroupResource::collection(Group::where('type','public')->WhereNot('user_id',Auth::id())->get());
+        $sharedGroups = GroupResource::collection($user->memberships()->get());
 
         $groups = [
             'personal-groups' => $personalGroups,
@@ -80,7 +81,7 @@ class GroupService extends Service
             return $this->responseService->message('unauthorized')
                 ->status(403)->error(true);
         }
-        
+                     
         return $this->responseService->data($group->memberships);
     }
     public function update(Request $request ,Group $group)

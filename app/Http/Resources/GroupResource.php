@@ -16,6 +16,7 @@ class GroupResource extends JsonResource
     {
         $files = FileResource::collection($this->files()->get());
         $users = UserResource::collection($this->memberships);
+
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
@@ -26,10 +27,14 @@ class GroupResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'files_count' => $files->count(),
-            'files' => $files,
-            'owner' => new UserResource($this->user),
             'users_count' => $users->count(),
-            'users' => $users,
+            $this->mergeWhen($request->is('api/groups/*'), [
+                'files' => $files,
+                'users' => $users,
+            ]), 
+            'owner' => new UserResource($this->user),
+            
+            
         ];
     }
 }
