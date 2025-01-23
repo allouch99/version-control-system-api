@@ -67,8 +67,9 @@ class FileService extends Service
                 return $this->responseService->message('unauthorized')
                     ->status(403)->error(true);
             }
+    
             $file = [
-                'name' => Str::slug($request['file']->getClientOriginalName(), '-'),
+                'name' => $request['file']->getClientOriginalName(),
                 'contents' => $request['file'],
                 'directory' => $group->filesDirectory,
             ];
@@ -107,9 +108,6 @@ class FileService extends Service
         if (!Storage::disk('local')->exists($file->path)) {
             throw new Exception('The file does not exist.', 404);
         }
-
-        
-
 
         Storage::copy($file->path,$file['directory'].'versions/'.$file->version.'/'.$file['name']);
         Storage::putFileAs($file['directory'], $request['file'], $file['name']);
